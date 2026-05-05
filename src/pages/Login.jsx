@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -36,6 +36,8 @@ export default function Login() {
         {
           headers: {
             'Content-Type': 'application/json',
+            'x-api-key': import.meta.env.VITE_API_KEY,
+            Accept: 'application/json',
           },
         }
       );
@@ -49,7 +51,18 @@ export default function Login() {
         setError('Invalid email or password');
       }
     } catch (err) {
-      setError('Unable to connect. Please check your internet connection.');
+      const message =
+        typeof err.response?.data?.message === 'string'
+          ? err.response.data.message
+          : '';
+
+      if (err.response?.status === 401 || err.response?.status === 422) {
+        setError(message || 'Invalid email or password');
+      } else if (err.response) {
+        setError(message || 'Login failed. Please try again.');
+      } else {
+        setError('Unable to connect. Please check your internet connection.');
+      }
     } finally {
       setLoading(false);
     }
@@ -67,10 +80,14 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Email Address <span className="text-red-500">*</span>
             </label>
             <input
+              id="email"
               type="email"
               placeholder="doctor@hospital.com"
               value={email}
@@ -80,10 +97,14 @@ export default function Login() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Password <span className="text-red-500">*</span>
             </label>
             <input
+              id="password"
               type="password"
               placeholder="Enter your password"
               value={password}
@@ -103,7 +124,7 @@ export default function Login() {
 
         {error && (
           <div className="mt-4 bg-red-50 border border-red-200 text-red-700 rounded-md px-4 py-3 text-sm flex items-center gap-2">
-            <span>⚠️</span>
+            <span aria-hidden="true">!</span>
             <span>{error}</span>
           </div>
         )}
