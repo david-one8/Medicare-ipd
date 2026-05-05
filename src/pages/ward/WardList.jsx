@@ -2,12 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
+import {
+  getRequestErrorMessage,
+  getResponseErrorMessage,
+  isUnauthorizedError,
+} from '../../utils/errorHandling';
 
 const PAGE_SIZE = 20;
 
 export default function WardList() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
 
   const [wards, setWards] = useState([]);
   const [stats, setStats] = useState({});
@@ -16,6 +21,7 @@ export default function WardList() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const fetchIdRef = useRef(0);
 
   useEffect(() => {
@@ -31,6 +37,7 @@ export default function WardList() {
     const fetchId = fetchIdRef.current + 1;
     fetchIdRef.current = fetchId;
     setLoading(true);
+    setError('');
 
     try {
       const res = await getApi.get('/get_ipd_ward', {
@@ -64,14 +71,15 @@ export default function WardList() {
         setWards([]);
         setStats({});
         setTotal(0);
+        setError(getResponseErrorMessage(res.data, 'Failed to load wards.'));
       }
-    } catch {
+    } catch (err) {
       if (fetchId !== fetchIdRef.current) return;
 
       setWards([]);
       setStats({});
       setTotal(0);
-      alert('Something went wrong.');
+      setError(getRequestErrorMessage(err, 'Failed to load wards.'));
     } finally {
       if (fetchId === fetchIdRef.current) {
         setLoading(false);
@@ -98,8 +106,14 @@ export default function WardList() {
             : 'Unable to delete ward.'
         );
       }
-    } catch {
-      alert('Something went wrong.');
+    } catch (err) {
+      if (isUnauthorizedError(err)) {
+        logout();
+        navigate('/login');
+        return;
+      }
+
+      setError(getRequestErrorMessage(err, 'Unable to delete ward.'));
     }
   };
 
@@ -162,6 +176,12 @@ export default function WardList() {
 
         <div className="text-sm text-gray-500">Page {currentPage}</div>
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (

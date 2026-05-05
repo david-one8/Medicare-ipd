@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
+import {
+  extractFieldErrors,
+  getRequestErrorMessage,
+  getResponseErrorMessage,
+  isUnauthorizedError,
+} from '../../utils/errorHandling';
 
 export default function WardForm() {
   const { id } = useParams();
@@ -41,16 +47,12 @@ export default function WardForm() {
             active: d.active === 1,
           });
         } else {
-          setError(
-            typeof res.data.message === 'string'
-              ? res.data.message
-              : 'Failed to load ward data.'
-          );
+          setError(getResponseErrorMessage(res.data, 'Failed to load ward data.'));
         }
-      } catch {
+      } catch (err) {
         if (ignore) return;
 
-        setError('Failed to load ward data.');
+        setError(getRequestErrorMessage(err, 'Failed to load ward data.'));
       } finally {
         if (!ignore) {
           setFetching(false);
@@ -115,23 +117,21 @@ export default function WardForm() {
 
       if (res.data.response === 200) {
         navigate('/ward');
-      } else if (res.data.response === 400) {
-        if (typeof res.data.message === 'string') {
-          setError(res.data.message);
-        } else if (typeof res.data.message === 'object' && res.data.message) {
-          setFieldErrors(res.data.message);
-        } else {
-          setError('Something went wrong. Please try again.');
-        }
       } else {
-        setError('Something went wrong. Please try again.');
+        const errors = extractFieldErrors(res.data.message);
+
+        if (Object.keys(errors).length > 0) {
+          setFieldErrors(errors);
+        }
+
+        setError(getResponseErrorMessage(res.data, 'Unable to save ward.'));
       }
     } catch (err) {
-      if (err.response?.status === 401) {
+      if (isUnauthorizedError(err)) {
         logout();
         navigate('/login');
       } else {
-        setError('Something went wrong. Please try again.');
+        setError(getRequestErrorMessage(err, 'Unable to save ward.'));
       }
     } finally {
       setLoading(false);
