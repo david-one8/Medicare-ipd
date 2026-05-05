@@ -18,7 +18,7 @@ export default function BedForm() {
   const [form, setForm] = useState({
     ward_id: '',
     bed_number: '',
-    bed_type: 'general',
+    bed_type_id: '',
     floor: 'Ground',
     charges_per_day: '',
     status: 'available',
@@ -26,6 +26,7 @@ export default function BedForm() {
     active: true,
   });
   const [wards, setWards] = useState([]);
+  const [bedTypes, setBedTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
   const [error, setError] = useState('');
@@ -67,6 +68,41 @@ export default function BedForm() {
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+
+    const loadBedTypes = async () => {
+      try {
+        const res = await getApi.get('/get_ipd_bed_type', {
+          params: {
+            clinic_id: 1,
+            active: 1,
+            start: 0,
+            end: 100,
+          },
+        });
+
+        if (ignore) return;
+
+        if (res.data.response === 200) {
+          setBedTypes(res.data.data || []);
+        } else {
+          setError(getResponseErrorMessage(res.data, 'Failed to load bed types.'));
+        }
+      } catch (err) {
+        if (ignore) return;
+
+        setError(getRequestErrorMessage(err, 'Failed to load bed types.'));
+      }
+    };
+
+    loadBedTypes();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isEdit) return;
 
     let ignore = false;
@@ -83,7 +119,7 @@ export default function BedForm() {
           setForm({
             ward_id: d.ward_id?.toString() || '',
             bed_number: d.bed_number || '',
-            bed_type: d.bed_type || 'general',
+            bed_type_id: d.bed_type_id?.toString() || '',
             floor: d.floor || 'Ground',
             charges_per_day: parseFloat(d.charges_per_day) || '',
             status: d.status || 'available',
@@ -122,16 +158,27 @@ export default function BedForm() {
     setError('');
     setFieldErrors({});
 
-    if (!form.ward_id || !form.bed_number.trim() || form.charges_per_day === '') {
+    if (
+      !form.ward_id ||
+      !form.bed_type_id ||
+      !form.bed_number.trim() ||
+      form.charges_per_day === ''
+    ) {
       setError('Please fill in all required fields.');
       return;
     }
 
     const parsedWardId = parseInt(form.ward_id, 10);
+    const parsedBedTypeId = parseInt(form.bed_type_id, 10);
     const parsedCharges = parseFloat(form.charges_per_day);
 
     if (Number.isNaN(parsedWardId)) {
       setError('Please select a valid ward.');
+      return;
+    }
+
+    if (Number.isNaN(parsedBedTypeId)) {
+      setError('Please select a valid bed type.');
       return;
     }
 
@@ -148,7 +195,7 @@ export default function BedForm() {
             id: parseInt(id, 10),
             ward_id: parsedWardId,
             bed_number: form.bed_number.trim(),
-            bed_type: form.bed_type,
+            bed_type_id: parsedBedTypeId,
             floor: form.floor,
             charges_per_day: parsedCharges,
             status: form.status,
@@ -159,7 +206,7 @@ export default function BedForm() {
             clinic_id: 1,
             ward_id: parsedWardId,
             bed_number: form.bed_number.trim(),
-            bed_type: form.bed_type,
+            bed_type_id: parsedBedTypeId,
             floor: form.floor,
             charges_per_day: parsedCharges,
             status: form.status,
@@ -276,27 +323,28 @@ export default function BedForm() {
 
           <div>
             <label
-              htmlFor="bed-type"
+              htmlFor="bed-type-id"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Bed Type
+              Bed Type <span className="text-red-500">*</span>
             </label>
             <select
-              id="bed-type"
-              name="bed_type"
-              value={form.bed_type}
+              id="bed-type-id"
+              name="bed_type_id"
+              value={form.bed_type_id}
               onChange={handleChange}
               className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="general">General</option>
-              <option value="private">Private</option>
-              <option value="semi_private">Semi Private</option>
-              <option value="icu">ICU</option>
-              <option value="emergency">Emergency</option>
+              <option value="">-- Select Bed Type --</option>
+              {bedTypes.map((bedType) => (
+                <option key={bedType.id} value={bedType.id}>
+                  {bedType.title}
+                </option>
+              ))}
             </select>
-            {fieldErrors.bed_type?.[0] && (
+            {fieldErrors.bed_type_id?.[0] && (
               <p className="text-red-500 text-xs mt-1">
-                {fieldErrors.bed_type[0]}
+                {fieldErrors.bed_type_id[0]}
               </p>
             )}
           </div>

@@ -17,7 +17,9 @@ export default function BedList() {
   const [beds, setBeds] = useState([]);
   const [stats, setStats] = useState({});
   const [wards, setWards] = useState([]);
+  const [bedTypes, setBedTypes] = useState([]);
   const [selectedWard, setSelectedWard] = useState('');
+  const [selectedBedType, setSelectedBedType] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [start, setStart] = useState(0);
   const [total, setTotal] = useState(0);
@@ -44,6 +46,27 @@ export default function BedList() {
     }
   };
 
+  const loadBedTypes = async () => {
+    try {
+      const res = await getApi.get('/get_ipd_bed_type', {
+        params: {
+          clinic_id: 1,
+          active: 1,
+          start: 0,
+          end: 100,
+        },
+      });
+
+      if (res.data.response === 200) {
+        setBedTypes(res.data.data || []);
+      } else {
+        setError(getResponseErrorMessage(res.data, 'Failed to load bed type filters.'));
+      }
+    } catch (err) {
+      setError(getRequestErrorMessage(err, 'Failed to load bed type filters.'));
+    }
+  };
+
   const fetchBeds = useCallback(async () => {
     const fetchId = fetchIdRef.current + 1;
     fetchIdRef.current = fetchId;
@@ -59,6 +82,7 @@ export default function BedList() {
       };
 
       if (selectedWard) params.ward_id = selectedWard;
+      if (selectedBedType) params.bed_type_id = selectedBedType;
       if (selectedStatus) params.status = selectedStatus;
 
       const res = await getApi.get('/get_ipd_bed', { params });
@@ -86,10 +110,11 @@ export default function BedList() {
         setLoading(false);
       }
     }
-  }, [selectedStatus, selectedWard, start]);
+  }, [selectedBedType, selectedStatus, selectedWard, start]);
 
   useEffect(() => {
     loadWards();
+    loadBedTypes();
   }, []);
 
   useEffect(() => {
@@ -230,7 +255,7 @@ export default function BedList() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label
               htmlFor="bed-filter-ward"
@@ -251,6 +276,31 @@ export default function BedList() {
               {wards.map((ward) => (
                 <option key={ward.id} value={ward.id}>
                   {ward.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="bed-filter-type"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Filter by Bed Type
+            </label>
+            <select
+              id="bed-filter-type"
+              value={selectedBedType}
+              onChange={(e) => {
+                setStart(0);
+                setSelectedBedType(e.target.value);
+              }}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-full"
+            >
+              <option value="">All Bed Types</option>
+              {bedTypes.map((bedType) => (
+                <option key={bedType.id} value={bedType.id}>
+                  {bedType.title}
                 </option>
               ))}
             </select>
@@ -331,7 +381,7 @@ export default function BedList() {
                       {bed.ward_title || '-'}
                     </td>
                     <td className="px-4 py-3 text-gray-700 capitalize">
-                      {(bed.bed_type || '-').replace('_', ' ')}
+                      {bed.bed_type_title || bed.bed_type || '-'}
                     </td>
                     <td className="px-4 py-3 text-gray-700">
                       {bed.floor || '-'}
