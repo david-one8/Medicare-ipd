@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
+import {
+  extractFieldErrors,
+  getRequestErrorMessage,
+  getResponseErrorMessage,
+  isUnauthorizedError,
+} from '../../utils/errorHandling';
 
 export default function BedForm() {
   const { id } = useParams();
@@ -43,11 +49,13 @@ export default function BedForm() {
 
         if (res.data.response === 200) {
           setWards(res.data.data || []);
+        } else {
+          setError(getResponseErrorMessage(res.data, 'Failed to load ward list.'));
         }
-      } catch {
+      } catch (err) {
         if (ignore) return;
 
-        setError('Failed to load ward list.');
+        setError(getRequestErrorMessage(err, 'Failed to load ward list.'));
       }
     };
 
@@ -83,12 +91,12 @@ export default function BedForm() {
             active: d.active === 1,
           });
         } else {
-          setError('Bed not found.');
+          setError(getResponseErrorMessage(res.data, 'Bed not found.'));
         }
-      } catch {
+      } catch (err) {
         if (ignore) return;
 
-        setError('Failed to load bed data.');
+        setError(getRequestErrorMessage(err, 'Failed to load bed data.'));
       } finally {
         if (!ignore) {
           setFetching(false);
@@ -164,23 +172,21 @@ export default function BedForm() {
 
       if (res.data.response === 200) {
         navigate('/bed');
-      } else if (res.data.response === 400) {
-        if (typeof res.data.message === 'string') {
-          setError(res.data.message);
-        } else if (typeof res.data.message === 'object' && res.data.message) {
-          setFieldErrors(res.data.message);
-        } else {
-          setError('Something went wrong. Please try again.');
-        }
       } else {
-        setError('Something went wrong. Please try again.');
+        const errors = extractFieldErrors(res.data.message);
+
+        if (Object.keys(errors).length > 0) {
+          setFieldErrors(errors);
+        }
+
+        setError(getResponseErrorMessage(res.data, 'Unable to save bed.'));
       }
     } catch (err) {
-      if (err.response?.status === 401) {
+      if (isUnauthorizedError(err)) {
         logout();
         navigate('/login');
       } else {
-        setError('Something went wrong. Please try again.');
+        setError(getRequestErrorMessage(err, 'Unable to save bed.'));
       }
     } finally {
       setLoading(false);

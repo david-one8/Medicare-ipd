@@ -2,12 +2,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
+import {
+  getRequestErrorMessage,
+  getResponseErrorMessage,
+  isUnauthorizedError,
+} from '../../utils/errorHandling';
 
 const PAGE_SIZE = 20;
 
 export default function BedList() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, logout } = useAuth();
 
   const [beds, setBeds] = useState([]);
   const [stats, setStats] = useState({});
@@ -34,8 +39,8 @@ export default function BedList() {
       if (res.data.response === 200) {
         setWards(res.data.data || []);
       }
-    } catch {
-      // Keep silent for dropdown load failure; main page still works
+    } catch (err) {
+      setError(getRequestErrorMessage(err, 'Failed to load ward filters.'));
     }
   };
 
@@ -69,15 +74,13 @@ export default function BedList() {
         setStats({});
         setTotal(0);
         setError(
-          typeof res.data.message === 'string'
-            ? res.data.message
-            : 'Failed to load beds.'
+          getResponseErrorMessage(res.data, 'Failed to load beds.')
         );
       }
-    } catch {
+    } catch (err) {
       if (fetchId !== fetchIdRef.current) return;
 
-      setError('Failed to load beds.');
+      setError(getRequestErrorMessage(err, 'Failed to load beds.'));
     } finally {
       if (fetchId === fetchIdRef.current) {
         setLoading(false);
@@ -103,14 +106,16 @@ export default function BedList() {
       if (res.data.response === 200) {
         fetchBeds();
       } else {
-        alert(
-          typeof res.data.message === 'string'
-            ? res.data.message
-            : 'Status update failed'
-        );
+        setError(getResponseErrorMessage(res.data, 'Status update failed.'));
       }
-    } catch {
-      alert('Something went wrong.');
+    } catch (err) {
+      if (isUnauthorizedError(err)) {
+        logout();
+        navigate('/login');
+        return;
+      }
+
+      setError(getRequestErrorMessage(err, 'Status update failed.'));
     }
   };
 
@@ -123,14 +128,16 @@ export default function BedList() {
       if (res.data.response === 200) {
         fetchBeds();
       } else {
-        alert(
-          typeof res.data.message === 'string'
-            ? res.data.message
-            : 'Delete failed'
-        );
+        setError(getResponseErrorMessage(res.data, 'Delete failed.'));
       }
-    } catch {
-      alert('Something went wrong.');
+    } catch (err) {
+      if (isUnauthorizedError(err)) {
+        logout();
+        navigate('/login');
+        return;
+      }
+
+      setError(getRequestErrorMessage(err, 'Delete failed.'));
     }
   };
 
