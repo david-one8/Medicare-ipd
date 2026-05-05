@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
@@ -18,6 +18,7 @@ export default function BedList() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const fetchIdRef = useRef(0);
 
   const loadWards = async () => {
     try {
@@ -39,6 +40,8 @@ export default function BedList() {
   };
 
   const fetchBeds = useCallback(async () => {
+    const fetchId = fetchIdRef.current + 1;
+    fetchIdRef.current = fetchId;
     setLoading(true);
     setError('');
 
@@ -55,6 +58,8 @@ export default function BedList() {
 
       const res = await getApi.get('/get_ipd_bed', { params });
 
+      if (fetchId !== fetchIdRef.current) return;
+
       if (res.data.response === 200) {
         setBeds(res.data.data || []);
         setStats(res.data.stats || {});
@@ -70,9 +75,13 @@ export default function BedList() {
         );
       }
     } catch {
+      if (fetchId !== fetchIdRef.current) return;
+
       setError('Failed to load beds.');
     } finally {
-      setLoading(false);
+      if (fetchId === fetchIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [selectedStatus, selectedWard, start]);
 
@@ -216,10 +225,14 @@ export default function BedList() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-filter-ward"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Filter by Ward
             </label>
             <select
+              id="bed-filter-ward"
               value={selectedWard}
               onChange={(e) => {
                 setStart(0);
@@ -237,10 +250,14 @@ export default function BedList() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-filter-status"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Filter by Status
             </label>
             <select
+              id="bed-filter-status"
               value={selectedStatus}
               onChange={(e) => {
                 setStart(0);

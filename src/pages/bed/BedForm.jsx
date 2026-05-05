@@ -26,6 +26,8 @@ export default function BedForm() {
   const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
+    let ignore = false;
+
     const loadWards = async () => {
       try {
         const res = await getApi.get('/get_ipd_ward', {
@@ -37,23 +39,35 @@ export default function BedForm() {
           },
         });
 
+        if (ignore) return;
+
         if (res.data.response === 200) {
           setWards(res.data.data || []);
         }
       } catch {
+        if (ignore) return;
+
         setError('Failed to load ward list.');
       }
     };
 
     loadWards();
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   useEffect(() => {
     if (!isEdit) return;
 
+    let ignore = false;
+
     const loadBed = async () => {
       try {
         const res = await getApi.get('/get_ipd_bed/' + id);
+
+        if (ignore) return;
 
         if (res.data.response === 200) {
           const d = res.data.data;
@@ -72,13 +86,21 @@ export default function BedForm() {
           setError('Bed not found.');
         }
       } catch {
+        if (ignore) return;
+
         setError('Failed to load bed data.');
       } finally {
-        setFetching(false);
+        if (!ignore) {
+          setFetching(false);
+        }
       }
     };
 
     loadBed();
+
+    return () => {
+      ignore = true;
+    };
   }, [id, isEdit]);
 
   const handleChange = (e) => {
@@ -196,10 +218,14 @@ export default function BedForm() {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-ward"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Ward <span className="text-red-500">*</span>
             </label>
             <select
+              id="bed-ward"
               name="ward_id"
               value={form.ward_id}
               onChange={handleChange}
@@ -220,10 +246,14 @@ export default function BedForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-number"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Bed Number <span className="text-red-500">*</span>
             </label>
             <input
+              id="bed-number"
               type="text"
               name="bed_number"
               value={form.bed_number}
@@ -239,10 +269,14 @@ export default function BedForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-type"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Bed Type
             </label>
             <select
+              id="bed-type"
               name="bed_type"
               value={form.bed_type}
               onChange={handleChange}
@@ -262,10 +296,14 @@ export default function BedForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-floor"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Floor
             </label>
             <select
+              id="bed-floor"
               name="floor"
               value={form.floor}
               onChange={handleChange}
@@ -283,10 +321,14 @@ export default function BedForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-charges"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Charges Per Day (Rs.) <span className="text-red-500">*</span>
             </label>
             <input
+              id="bed-charges"
               type="number"
               min="0"
               step="0.01"
@@ -303,10 +345,14 @@ export default function BedForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-status"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Status
             </label>
             <select
+              id="bed-status"
               name="status"
               value={form.status}
               onChange={handleChange}
@@ -324,10 +370,14 @@ export default function BedForm() {
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="bed-notes"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Notes
             </label>
             <textarea
+              id="bed-notes"
               name="notes"
               rows="3"
               value={form.notes}
@@ -344,6 +394,7 @@ export default function BedForm() {
           <div className="md:col-span-2">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
+                id="bed-active"
                 type="checkbox"
                 checked={form.active}
                 onChange={(e) =>
