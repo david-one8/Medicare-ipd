@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 const PAGE_SIZE = 20;
 
@@ -38,7 +38,7 @@ export default function BedList() {
     }
   };
 
-  const fetchBeds = async () => {
+  const fetchBeds = useCallback(async () => {
     setLoading(true);
     setError('');
 
@@ -74,7 +74,7 @@ export default function BedList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedStatus, selectedWard, start]);
 
   useEffect(() => {
     loadWards();
@@ -82,7 +82,7 @@ export default function BedList() {
 
   useEffect(() => {
     fetchBeds();
-  }, [start, selectedWard, selectedStatus]);
+  }, [fetchBeds]);
 
   const handleStatusChange = async (bedId, newStatus) => {
     try {
@@ -173,7 +173,7 @@ export default function BedList() {
 
       <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow-sm border-l-4 border-blue-500 p-4">
-          <div className="text-xl">🛏️</div>
+          <div className="text-xs font-semibold uppercase text-blue-600">Beds</div>
           <div className="text-2xl font-bold text-gray-800 mt-2">
             {stats.total_beds ?? 0}
           </div>
@@ -181,7 +181,7 @@ export default function BedList() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border-l-4 border-green-500 p-4">
-          <div className="text-xl">✅</div>
+          <div className="text-xs font-semibold uppercase text-green-600">Open</div>
           <div className="text-2xl font-bold text-gray-800 mt-2">
             {stats.available ?? 0}
           </div>
@@ -189,7 +189,7 @@ export default function BedList() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border-l-4 border-red-500 p-4">
-          <div className="text-xl">🔴</div>
+          <div className="text-xs font-semibold uppercase text-red-600">Busy</div>
           <div className="text-2xl font-bold text-gray-800 mt-2">
             {stats.occupied ?? 0}
           </div>
@@ -197,7 +197,7 @@ export default function BedList() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border-l-4 border-yellow-500 p-4">
-          <div className="text-xl">🔧</div>
+          <div className="text-xs font-semibold uppercase text-yellow-600">Repair</div>
           <div className="text-2xl font-bold text-gray-800 mt-2">
             {stats.maintenance ?? 0}
           </div>
@@ -205,7 +205,7 @@ export default function BedList() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border-l-4 border-purple-500 p-4">
-          <div className="text-xl">📊</div>
+          <div className="text-xs font-semibold uppercase text-purple-600">Rate</div>
           <div className="text-2xl font-bold text-gray-800 mt-2">
             {stats.occupancy_rate ?? 0}%
           </div>
@@ -270,7 +270,7 @@ export default function BedList() {
           </div>
         ) : beds.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
-            <div className="text-4xl mb-3">🛏️</div>
+            <div className="text-sm font-semibold uppercase text-gray-400 mb-3">Bed</div>
             <p className="text-lg font-medium">No beds found</p>
             <p className="text-sm mt-1">
               Try changing filters or add a new bed.
@@ -313,7 +313,7 @@ export default function BedList() {
                       {bed.floor || '-'}
                     </td>
                     <td className="px-4 py-3 text-gray-700">
-                      ₹
+                      Rs.{' '}
                       {Number.isNaN(parseFloat(bed.charges_per_day))
                         ? '0'
                         : parseFloat(bed.charges_per_day).toFixed(0)}
@@ -360,7 +360,7 @@ export default function BedList() {
 
       <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-gray-600">
-          Showing {showingFrom}–{showingTo} of {total} beds
+          Showing {showingFrom}-{showingTo} of {total} beds
         </p>
 
         <div className="flex items-center gap-2">

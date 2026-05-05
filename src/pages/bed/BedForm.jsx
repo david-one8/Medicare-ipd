@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 export default function BedForm() {
   const { id } = useParams();
@@ -179,7 +179,7 @@ export default function BedForm() {
         onClick={() => navigate('/bed')}
         className="text-sm text-blue-600 hover:underline flex items-center gap-1 mb-4"
       >
-        <span>←</span>
+        <span aria-hidden="true">&lt;-</span>
         <span>Back to Beds</span>
       </button>
 
@@ -284,7 +284,7 @@ export default function BedForm() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Charges Per Day (₹) <span className="text-red-500">*</span>
+              Charges Per Day (Rs.) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
