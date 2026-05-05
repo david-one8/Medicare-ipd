@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import {
+  getRequestErrorMessage,
+  getResponseErrorMessage,
+} from '../utils/errorHandling';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -34,6 +38,7 @@ export default function Login() {
         `${import.meta.env.VITE_API_BASE_URL}/login`,
         { email, password },
         {
+          timeout: 30000,
           headers: {
             'Content-Type': 'application/json',
             'x-api-key': import.meta.env.VITE_API_KEY,
@@ -42,27 +47,16 @@ export default function Login() {
         }
       );
 
-      if (res.data.response === 200) {
+      if (res.data.response === 200 && res.data.token) {
         login(res.data.token);
         navigate('/ward');
-      } else if (res.data.response === 400) {
-        setError(res.data.message || 'Invalid email or password');
+      } else if (res.data.response === 200 && !res.data.token) {
+        setError('Login succeeded but no bearer token was returned.');
       } else {
-        setError('Invalid email or password');
+        setError(getResponseErrorMessage(res.data, 'Invalid email or password'));
       }
     } catch (err) {
-      const message =
-        typeof err.response?.data?.message === 'string'
-          ? err.response.data.message
-          : '';
-
-      if (err.response?.status === 401 || err.response?.status === 422) {
-        setError(message || 'Invalid email or password');
-      } else if (err.response) {
-        setError(message || 'Login failed. Please try again.');
-      } else {
-        setError('Unable to connect. Please check your internet connection.');
-      }
+      setError(getRequestErrorMessage(err, 'Login failed. Please try again.'));
     } finally {
       setLoading(false);
     }
