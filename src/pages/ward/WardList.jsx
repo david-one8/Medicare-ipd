@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 const PAGE_SIZE = 20;
 
@@ -26,7 +26,7 @@ export default function WardList() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const fetchWards = async () => {
+  const fetchWards = useCallback(async () => {
     setLoading(true);
 
     try {
@@ -49,7 +49,7 @@ export default function WardList() {
         setStats({});
         setTotal(0);
       }
-    } catch (err) {
+    } catch {
       setWards([]);
       setStats({});
       setTotal(0);
@@ -57,11 +57,11 @@ export default function WardList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearch, start]);
 
   useEffect(() => {
     fetchWards();
-  }, [start, debouncedSearch]);
+  }, [fetchWards]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this ward?')) return;
@@ -107,7 +107,7 @@ export default function WardList() {
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="bg-white rounded-lg shadow p-5 border-l-4 border-blue-500">
-          <div className="text-2xl">🏥</div>
+          <div className="text-xs font-semibold uppercase text-blue-600">Ward</div>
           <div className="text-3xl font-bold text-gray-800 mt-3">
             {stats.total_wards ?? 0}
           </div>
@@ -115,7 +115,7 @@ export default function WardList() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-5 border-l-4 border-green-500">
-          <div className="text-2xl">✅</div>
+          <div className="text-xs font-semibold uppercase text-green-600">Active</div>
           <div className="text-3xl font-bold text-gray-800 mt-3">
             {stats.active_wards ?? 0}
           </div>
@@ -123,7 +123,7 @@ export default function WardList() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-5 border-l-4 border-purple-500">
-          <div className="text-2xl">🛏️</div>
+          <div className="text-xs font-semibold uppercase text-purple-600">Beds</div>
           <div className="text-3xl font-bold text-gray-800 mt-3">
             {stats.total_beds ?? 0}
           </div>
@@ -150,7 +150,7 @@ export default function WardList() {
           </div>
         ) : wards.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
-            <div className="text-4xl mb-3">🏥</div>
+            <div className="text-sm font-semibold uppercase text-gray-400 mb-3">Ward</div>
             <p className="text-lg font-medium">No wards found</p>
             <p className="text-sm mt-1">
               Try adjusting your search or add a new ward.
@@ -224,7 +224,7 @@ export default function WardList() {
 
       <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p className="text-sm text-gray-600">
-          Showing {showingFrom}–{showingTo} of {total} wards
+          Showing {showingFrom}-{showingTo} of {total} wards
         </p>
 
         <div className="flex items-center gap-2">

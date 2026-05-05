@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 export default function WardForm() {
   const { id } = useParams();
@@ -140,7 +140,7 @@ export default function WardForm() {
         onClick={() => navigate('/ward')}
         className="text-sm text-blue-600 hover:underline flex items-center gap-1 mb-4"
       >
-        <span>←</span>
+        <span aria-hidden="true">&lt;-</span>
         <span>Back to Wards</span>
       </button>
 
