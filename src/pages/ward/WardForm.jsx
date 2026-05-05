@@ -23,9 +23,13 @@ export default function WardForm() {
   useEffect(() => {
     if (!isEdit) return;
 
+    let ignore = false;
+
     const loadWard = async () => {
       try {
         const res = await getApi.get('/get_ipd_ward/' + id);
+
+        if (ignore) return;
 
         if (res.data.response === 200) {
           const d = res.data.data;
@@ -44,13 +48,21 @@ export default function WardForm() {
           );
         }
       } catch {
+        if (ignore) return;
+
         setError('Failed to load ward data.');
       } finally {
-        setFetching(false);
+        if (!ignore) {
+          setFetching(false);
+        }
       }
     };
 
     loadWard();
+
+    return () => {
+      ignore = true;
+    };
   }, [id, isEdit]);
 
   const handleChange = (e) => {
@@ -156,10 +168,14 @@ export default function WardForm() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="ward-title"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Ward Title <span className="text-red-500">*</span>
           </label>
           <input
+            id="ward-title"
             type="text"
             name="title"
             value={form.title}
@@ -173,10 +189,14 @@ export default function WardForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="ward-description"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Description
           </label>
           <textarea
+            id="ward-description"
             name="description"
             rows="3"
             value={form.description}
@@ -192,10 +212,14 @@ export default function WardForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="ward-total-beds"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Total Beds <span className="text-red-500">*</span>
           </label>
           <input
+            id="ward-total-beds"
             type="number"
             name="total_beds"
             min="1"
@@ -214,6 +238,7 @@ export default function WardForm() {
         <div>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
+              id="ward-active"
               type="checkbox"
               checked={form.active}
               onChange={(e) =>

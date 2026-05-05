@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
@@ -16,6 +16,7 @@ export default function WardList() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const fetchIdRef = useRef(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,6 +28,8 @@ export default function WardList() {
   }, [search]);
 
   const fetchWards = useCallback(async () => {
+    const fetchId = fetchIdRef.current + 1;
+    fetchIdRef.current = fetchId;
     setLoading(true);
 
     try {
@@ -40,22 +43,39 @@ export default function WardList() {
         },
       });
 
+      if (fetchId !== fetchIdRef.current) return;
+
       if (res.data.response === 200) {
-        setWards(res.data.data || []);
-        setStats(res.data.stats || {});
-        setTotal(res.data.total_record || 0);
+        const wardData = res.data.data || [];
+
+        setWards(wardData);
+        setStats(
+          res.data.stats || {
+            total_wards: res.data.total_record || wardData.length,
+            active_wards: wardData.filter((ward) => ward.active === 1).length,
+            total_beds: wardData.reduce(
+              (sum, ward) => sum + (Number(ward.total_beds) || 0),
+              0
+            ),
+          }
+        );
+        setTotal(res.data.total_record || wardData.length);
       } else {
         setWards([]);
         setStats({});
         setTotal(0);
       }
     } catch {
+      if (fetchId !== fetchIdRef.current) return;
+
       setWards([]);
       setStats({});
       setTotal(0);
       alert('Something went wrong.');
     } finally {
-      setLoading(false);
+      if (fetchId === fetchIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [debouncedSearch, start]);
 
