@@ -9,6 +9,8 @@ import {
   isUnauthorizedError,
 } from '../../utils/errorHandling';
 
+const MAX_BED_NUMBER_LENGTH = 12;
+
 export default function BedForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -168,6 +170,18 @@ export default function BedForm() {
       return;
     }
 
+    const bedNumber = form.bed_number.trim();
+
+    if (bedNumber.length > MAX_BED_NUMBER_LENGTH) {
+      setFieldErrors({
+        bed_number: [
+          `Bed Number must be ${MAX_BED_NUMBER_LENGTH} characters or fewer.`,
+        ],
+      });
+      setError('Please fix the highlighted fields and try again.');
+      return;
+    }
+
     const parsedWardId = parseInt(form.ward_id, 10);
     const parsedBedTypeId = parseInt(form.bed_type_id, 10);
     const parsedCharges = parseFloat(form.charges_per_day);
@@ -194,7 +208,7 @@ export default function BedForm() {
         ? {
             id: parseInt(id, 10),
             ward_id: parsedWardId,
-            bed_number: form.bed_number.trim(),
+            bed_number: bedNumber,
             bed_type_id: parsedBedTypeId,
             floor: form.floor,
             charges_per_day: parsedCharges,
@@ -205,7 +219,7 @@ export default function BedForm() {
         : {
             clinic_id: 1,
             ward_id: parsedWardId,
-            bed_number: form.bed_number.trim(),
+            bed_number: bedNumber,
             bed_type_id: parsedBedTypeId,
             floor: form.floor,
             charges_per_day: parsedCharges,
@@ -311,6 +325,7 @@ export default function BedForm() {
               name="bed_number"
               value={form.bed_number}
               onChange={handleChange}
+              maxLength={MAX_BED_NUMBER_LENGTH}
               placeholder="e.g. G-101, ICU-03"
               className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
