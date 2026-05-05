@@ -12,6 +12,8 @@ import WardList from './pages/ward/WardList';
 import WardForm from './pages/ward/WardForm';
 import BedList from './pages/bed/BedList';
 import BedForm from './pages/bed/BedForm';
+import BedTypeList from './pages/bedType/BedTypeList';
+import BedTypeForm from './pages/bedType/BedTypeForm';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('bearer_token');
@@ -54,6 +56,10 @@ function Layout({ pageTitle, children }) {
 
           <NavLink to="/bed" className={linkClass}>
             <span>Bed Management</span>
+          </NavLink>
+
+          <NavLink to="/bed-type" className={linkClass}>
+            <span>Bed Types</span>
           </NavLink>
         </nav>
       </aside>
@@ -150,6 +156,39 @@ export default function App() {
           <ProtectedRoute>
             <Layout pageTitle="Edit Bed">
               <BedForm />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/bed-type"
+        element={
+          <ProtectedRoute>
+            <Layout pageTitle="Bed Type Management">
+              <BedTypeList />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/bed-type/add"
+        element={
+          <ProtectedRoute>
+            <Layout pageTitle="Add Bed Type">
+              <BedTypeForm />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/bed-type/:id"
+        element={
+          <ProtectedRoute>
+            <Layout pageTitle="Edit Bed Type">
+              <BedTypeForm />
             </Layout>
           </ProtectedRoute>
         }
