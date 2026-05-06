@@ -5,6 +5,7 @@ import {
   NavLink,
   useNavigate,
 } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from './context/useAuth';
 import Login from './pages/Login';
@@ -28,62 +29,145 @@ function ProtectedRoute({ children }) {
 function Layout({ pageTitle, children }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [isSidebarOpen]);
 
   const handleLogout = () => {
+    setIsSidebarOpen(false);
     logout();
     navigate('/login');
   };
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all border-l-4 ${
+    `flex min-h-11 items-center gap-3 border-l-4 px-4 py-3 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 ${
       isActive
         ? 'bg-slate-700 border-blue-400 text-white'
         : 'border-transparent text-slate-200 hover:bg-slate-700 hover:text-white'
     }`;
 
-  return (
-    <div className="min-h-screen flex bg-gray-50">
-      <aside className="fixed left-0 top-0 h-screen w-[220px] bg-slate-800 text-white">
-        <div className="border-b border-slate-700 px-4 py-5">
+  const sidebarContent = (
+    <>
+      <div className="flex items-start justify-between gap-3 border-b border-slate-700 px-4 py-5">
+        <div>
           <h1 className="text-xl font-bold">Medicare IPD</h1>
           <p className="mt-1 text-xs text-slate-300">Ward & Bed Management</p>
         </div>
 
-        <nav className="mt-4 flex flex-col">
-          <NavLink to="/ward" className={linkClass}>
-            <span>Ward Management</span>
-          </NavLink>
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          onClick={() => setIsSidebarOpen(false)}
+          className="rounded-md p-2 text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-300 lg:hidden"
+        >
+          X
+        </button>
+      </div>
 
-          <NavLink to="/bed" className={linkClass}>
-            <span>Bed Management</span>
-          </NavLink>
+      <nav className="mt-4 flex flex-col" aria-label="Primary navigation">
+        <NavLink
+          to="/ward"
+          className={linkClass}
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <span>Ward Management</span>
+        </NavLink>
 
-          <NavLink to="/bed-type" className={linkClass}>
-            <span>Bed Types</span>
-          </NavLink>
-        </nav>
+        <NavLink
+          to="/bed"
+          className={linkClass}
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <span>Bed Management</span>
+        </NavLink>
+
+        <NavLink
+          to="/bed-type"
+          className={linkClass}
+          onClick={() => setIsSidebarOpen(false)}
+        >
+          <span>Bed Types</span>
+        </NavLink>
+      </nav>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-gray-50">
+      <aside className="fixed left-0 top-0 z-30 hidden h-screen w-[240px] bg-slate-800 text-white lg:block">
+        {sidebarContent}
       </aside>
 
-      <div className="ml-[220px] flex min-h-screen flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-800">{pageTitle}</h2>
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <button
+            type="button"
+            aria-label="Close navigation overlay"
+            onClick={() => setIsSidebarOpen(false)}
+            className="absolute inset-0 h-full w-full bg-black/40"
+          />
+          <aside className="relative h-full w-[min(82vw,280px)] bg-slate-800 text-white shadow-xl">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
 
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-600">
-              <p className="font-medium text-gray-800">Medicare User</p>
-              <p>Authenticated Session</p>
+      <div className="flex min-h-screen min-w-0 flex-col lg:pl-[240px]">
+        <header className="sticky top-0 z-20 border-b border-gray-200 bg-white px-4 py-3 shadow-sm sm:px-5 lg:px-6 lg:py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <button
+                type="button"
+                aria-label="Open navigation menu"
+                aria-expanded={isSidebarOpen}
+                onClick={() => setIsSidebarOpen(true)}
+                className="inline-flex h-11 w-11 shrink-0 flex-col items-center justify-center gap-1.5 rounded-md border border-gray-200 text-slate-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:hidden"
+              >
+                <span className="h-0.5 w-5 rounded bg-current" />
+                <span className="h-0.5 w-5 rounded bg-current" />
+                <span className="h-0.5 w-5 rounded bg-current" />
+              </button>
+
+              <h2 className="min-w-0 truncate text-lg font-semibold text-gray-800 sm:text-xl">
+                {pageTitle}
+              </h2>
             </div>
 
-            <button
-              onClick={handleLogout}
-              className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-            >
-              Logout
-            </button>
+            <div className="flex items-center justify-between gap-3 sm:justify-end">
+              <div className="min-w-0 text-xs text-gray-600 sm:text-sm">
+                <p className="truncate font-medium text-gray-800">Medicare User</p>
+                <p className="truncate">Authenticated Session</p>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="min-h-11 shrink-0 rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </header>
 
-        <main className="flex-1 bg-gray-50 p-6">{children}</main>
+        <main className="min-w-0 flex-1 bg-gray-50 p-4 sm:p-5 lg:p-6">
+          {children}
+        </main>
       </div>
     </div>
   );
