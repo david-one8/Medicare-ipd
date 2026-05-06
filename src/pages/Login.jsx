@@ -63,12 +63,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md border-t-4 border-blue-600">
-        <h1 className="text-2xl font-bold text-gray-900 text-center mb-1">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
+      <div className="w-full max-w-md rounded-xl border-t-4 border-blue-600 bg-white p-5 shadow-lg sm:p-8">
+        <h1 className="mb-1 text-center text-xl font-bold text-gray-900 sm:text-2xl">
           Medicare IPD
         </h1>
-        <p className="text-sm text-gray-500 text-center mb-6">
+        <p className="mb-6 text-center text-sm text-gray-500">
           Ward &amp; Bed Management
         </p>
 
@@ -87,7 +87,7 @@ export default function Login() {
               placeholder="doctor@hospital.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -105,21 +105,21 @@ export default function Login() {
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+            className="mt-2 min-h-11 w-full rounded-md bg-blue-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         {error && (
-          <div className="mt-4 bg-red-50 border border-red-200 text-red-700 rounded-md px-4 py-3 text-sm flex items-center gap-2">
+          <div className="mt-4 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <span aria-hidden="true">!</span>
             <span>{error}</span>
           </div>
