@@ -260,16 +260,16 @@ export default function BedForm() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-2xl mx-auto mt-6">
+    <div className="mx-auto mt-2 max-w-4xl rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:mt-4 sm:p-6">
       <button
         onClick={() => navigate('/bed')}
-        className="text-sm text-blue-600 hover:underline flex items-center gap-1 mb-4"
+        className="mb-4 inline-flex min-h-10 items-center gap-1 rounded-md text-sm font-medium text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <span aria-hidden="true">&lt;-</span>
         <span>Back to Beds</span>
       </button>
 
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+      <h1 className="mb-6 text-xl font-bold text-gray-800 sm:text-2xl">
         {isEdit ? 'Edit Bed' : 'Add Bed'}
       </h1>
 
@@ -280,7 +280,7 @@ export default function BedForm() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div>
             <label
               htmlFor="bed-ward"
@@ -293,7 +293,7 @@ export default function BedForm() {
               name="ward_id"
               value={form.ward_id}
               onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">-- Select Ward --</option>
               {wards.map((w) => (
@@ -324,7 +324,7 @@ export default function BedForm() {
               onChange={handleChange}
               maxLength={MAX_BED_NUMBER_LENGTH}
               placeholder="e.g. G-101, ICU-03"
-              className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {fieldErrors.bed_number?.[0] && (
               <p className="text-red-500 text-xs mt-1">
@@ -345,7 +345,7 @@ export default function BedForm() {
               name="bed_type_id"
               value={form.bed_type_id}
               onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">-- Select Bed Type --</option>
               {bedTypes.map((bedType) => (
@@ -373,7 +373,7 @@ export default function BedForm() {
               name="floor"
               value={form.floor}
               onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="Ground">Ground</option>
               <option value="1st">1st</option>
@@ -401,7 +401,7 @@ export default function BedForm() {
               name="charges_per_day"
               value={form.charges_per_day}
               onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {fieldErrors.charges_per_day?.[0] && (
               <p className="text-red-500 text-xs mt-1">
@@ -422,7 +422,7 @@ export default function BedForm() {
               name="status"
               value={form.status}
               onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="available">Available</option>
               <option value="occupied">Occupied</option>
@@ -435,7 +435,7 @@ export default function BedForm() {
             )}
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <label
               htmlFor="bed-notes"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -448,7 +448,7 @@ export default function BedForm() {
               rows="3"
               value={form.notes}
               onChange={handleChange}
-              className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {fieldErrors.notes?.[0] && (
               <p className="text-red-500 text-xs mt-1">
@@ -457,7 +457,7 @@ export default function BedForm() {
             )}
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 id="bed-active"
@@ -466,7 +466,7 @@ export default function BedForm() {
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, active: e.target.checked }))
                 }
-                className="w-4 h-4 accent-blue-600"
+                className="h-5 w-5 accent-blue-600"
               />
               <span className="text-sm text-gray-700">Mark as Active</span>
             </label>
@@ -482,7 +482,7 @@ export default function BedForm() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-blue-700 disabled:opacity-60 transition-colors"
+            className="min-h-11 w-full rounded-md bg-blue-600 px-6 py-2.5 font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
           >
             {loading
               ? isEdit
