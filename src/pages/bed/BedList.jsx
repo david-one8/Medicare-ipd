@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
+import { TableSkeleton } from '../../components/BoneyardLoaders';
 import {
   getRequestErrorMessage,
   getResponseErrorMessage,
@@ -339,9 +340,7 @@ export default function BedList() {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          </div>
+          <TableSkeleton name="bed-list-table" columns={8} rows={6} />
         ) : beds.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <div className="text-sm font-semibold uppercase text-gray-400 mb-3">Bed</div>

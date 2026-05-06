@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
+import { FormSkeleton } from '../../components/BoneyardLoaders';
 import {
   extractFieldErrors,
   getRequestErrorMessage,
@@ -255,11 +256,7 @@ export default function BedForm() {
   };
 
   if (fetching) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <FormSkeleton name="bed-edit-form" fields={7} />;
   }
 
   return (
