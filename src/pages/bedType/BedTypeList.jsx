@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getApi, postApi } from '../../services/api';
 import { useAuth } from '../../context/useAuth';
 import { TableSkeleton } from '../../components/BoneyardLoaders';
+import { PaginationBar } from '../../components/PaginationBar';
 import {
   getRequestErrorMessage,
   getResponseErrorMessage,
@@ -105,10 +106,12 @@ export default function BedTypeList() {
   const showingTo = Math.min(start + PAGE_SIZE, total);
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Bed Type Management</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-gray-800 sm:text-2xl">
+            Bed Type Management
+          </h1>
           <p className="mt-1 text-sm text-gray-500">
             Manage reusable bed type records for IPD beds.
           </p>
@@ -116,19 +119,19 @@ export default function BedTypeList() {
 
         <button
           onClick={() => navigate('/bed-type/add')}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="min-h-11 w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
         >
           Add Bed Type
         </button>
       </div>
 
-      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <input
           type="text"
           placeholder="Search bed type..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-64"
+          className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-72"
         />
 
         <div className="text-sm text-gray-500">Page {currentPage}</div>
@@ -140,7 +143,7 @@ export default function BedTypeList() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
         {loading ? (
           <TableSkeleton name="bed-type-list-table" columns={6} rows={6} />
         ) : bedTypes.length === 0 ? (
@@ -154,8 +157,59 @@ export default function BedTypeList() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <>
+          <div className="divide-y divide-gray-100 md:hidden">
+            {bedTypes.map((bedType, index) => (
+              <div key={bedType.id} className="p-4">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-400">
+                      #{start + index + 1}
+                    </p>
+                    <h3 className="mt-1 truncate text-base font-semibold text-gray-800">
+                      {bedType.title}
+                    </h3>
+                    <p className="mt-1 line-clamp-2 text-sm text-gray-500">
+                      {bedType.description || 'No description'}
+                    </p>
+                  </div>
+
+                  {bedType.active === 1 ? (
+                    <span className="shrink-0 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
+                      Active
+                    </span>
+                  ) : (
+                    <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+                      Inactive
+                    </span>
+                  )}
+                </div>
+
+                <div className="mb-4 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                  <span className="font-medium text-gray-500">Clinic:</span>{' '}
+                  {bedType.clinic_title || '-'}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => navigate(`/bed-type/${bedType.id}`)}
+                    className="min-h-11 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(bedType.id)}
+                    className="min-h-11 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
+            <table className="min-w-[760px] w-full text-left text-sm">
               <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
                 <tr>
                   <th className="px-4 py-3 font-medium">#</th>
@@ -199,13 +253,13 @@ export default function BedTypeList() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => navigate(`/bed-type/${bedType.id}`)}
-                          className="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-md text-xs font-medium hover:bg-blue-100"
+                          className="min-h-10 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(bedType.id)}
-                          className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-md text-xs font-medium hover:bg-red-100"
+                          className="min-h-10 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500"
                         >
                           Delete
                         </button>
@@ -216,32 +270,18 @@ export default function BedTypeList() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <p className="text-sm text-gray-600">
-          Showing {showingFrom}-{showingTo} of {total} bed types
-        </p>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setStart((prev) => Math.max(prev - PAGE_SIZE, 0))}
-            disabled={start === 0}
-            className="border border-gray-300 rounded px-3 py-1.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Previous
-          </button>
-
-          <button
-            onClick={() => setStart((prev) => prev + PAGE_SIZE)}
-            disabled={start + PAGE_SIZE >= total}
-            className="border border-gray-300 rounded px-3 py-1.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-          >
-            Next
-          </button>
-        </div>
-      </div>
+      <PaginationBar
+        label={`Showing ${showingFrom}-${showingTo} of ${total} bed types`}
+        currentPage={currentPage}
+        canPrevious={start !== 0}
+        canNext={start + PAGE_SIZE < total}
+        onPrevious={() => setStart((prev) => Math.max(prev - PAGE_SIZE, 0))}
+        onNext={() => setStart((prev) => prev + PAGE_SIZE)}
+      />
     </div>
   );
 }

@@ -132,16 +132,16 @@ export default function BedTypeForm() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-2xl mx-auto mt-6">
+    <div className="mx-auto mt-2 max-w-2xl rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:mt-4 sm:p-6">
       <button
         onClick={() => navigate('/bed-type')}
-        className="text-sm text-blue-600 hover:underline flex items-center gap-1 mb-4"
+        className="mb-4 inline-flex min-h-10 items-center gap-1 rounded-md text-sm font-medium text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <span aria-hidden="true">&lt;-</span>
         <span>Back to Bed Types</span>
       </button>
 
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+      <h1 className="mb-6 text-xl font-bold text-gray-800 sm:text-2xl">
         {isEdit ? 'Edit Bed Type' : 'Add Bed Type'}
       </h1>
 
@@ -165,7 +165,7 @@ export default function BedTypeForm() {
             name="title"
             value={form.title}
             onChange={handleChange}
-            className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="min-h-11 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter bed type title"
           />
           {fieldErrors.title?.[0] && (
@@ -186,7 +186,7 @@ export default function BedTypeForm() {
             rows="3"
             value={form.description}
             onChange={handleChange}
-            className="border border-gray-300 rounded-md px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter description"
           />
           {fieldErrors.description?.[0] && (
@@ -205,7 +205,7 @@ export default function BedTypeForm() {
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, active: e.target.checked }))
               }
-              className="w-4 h-4 accent-blue-600"
+              className="h-5 w-5 accent-blue-600"
             />
             <span className="text-sm text-gray-700">Mark as Active</span>
           </label>
@@ -218,7 +218,7 @@ export default function BedTypeForm() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-60"
+            className="min-h-11 w-full rounded-md bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
           >
             {loading
               ? isEdit
