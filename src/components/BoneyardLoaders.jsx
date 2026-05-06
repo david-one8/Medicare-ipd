@@ -10,7 +10,7 @@ export function TableSkeleton({ name, columns = 6, rows = 6 }) {
 
   const fixture = (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left">
+      <table className="min-w-[720px] w-full text-left text-sm">
         <thead className="bg-gray-50">
           <tr>
             {headerCells.map((_, index) => (
@@ -62,7 +62,7 @@ export function FormSkeleton({ name, fields = 4 }) {
   const fieldRows = Array.from({ length: fields });
 
   const fixture = (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-2xl mx-auto mt-6">
+    <div className="mx-auto mt-2 max-w-2xl rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:mt-4 sm:p-6">
       <SkeletonBlock className="h-4 w-28 mb-4" />
       <SkeletonBlock className="h-8 w-44 mb-6" />
       <div className="space-y-5">
